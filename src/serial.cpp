@@ -7,21 +7,19 @@ Serial::Serial(std::string dev) {
     openPort();
 }
 
-bool Serial::openPort(){
+void Serial::openPort(){
     file_desc = open(dev.c_str(), O_RDWR);
 
     if(file_desc < 0){
         printf("Serial port %s couldn't opened\n", dev.c_str());
-        return false;
+        exit(1);
     }
 
     if (!configurePort()) {
         disconnectPort();
         printf("Serial Port Couldn't Configure\n");
-        return false;
+        exit(1);
     }
-
-    return true;
 }
 
 void Serial::disconnectPort(){
@@ -80,8 +78,8 @@ bool Serial::configurePort(){
     return true;
 }
 
-void Serial::readData(){
-    char buffer[255];
+void Serial::readData(uint8_t* read_buffer, uint8_t buffer_size){
+    char buffer[buffer_size];
     int retval = poll(pollfds, 1, 100);
     if (retval <= 0) {
         return;
@@ -92,7 +90,7 @@ void Serial::readData(){
         int n = read(file_desc , buffer, sizeof(buffer));
         std::cout<<"n: "<<n<<std::endl;
         for (size_t i = 0; i < n; i++) {
-            std::cout<<"value: "<<(int)(buffer[i])<<std::endl;
+            read_buffer[i] = buffer[i];
         }
         if (n < 0) {
             throw std::system_error(EFAULT, std::system_category());

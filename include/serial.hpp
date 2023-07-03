@@ -20,13 +20,13 @@ class Serial
 {
 public:
     Serial(std::string dev);
-    void readData();
+    void readData(uint8_t* read_buffer, uint8_t buffer_size);
     void writeData(uint8_t* buffer);
 
 private:
     void disconnectPort();
     bool configurePort();
-    bool openPort();
+    void openPort();
 
     int file_desc;
     struct pollfd pollfds[1];
